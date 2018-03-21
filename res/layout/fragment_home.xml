@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.wise.mediarec.MainActivity" >
+
+    <Button 
+        android:id="@+id/btnEncode"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Encode Demo">
+    </Button>
+    
+    <Button
+        android:id="@+id/btnDecode"
+        android:layout_below="@id/btnEncode"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Decode demo">
+    </Button>
+
+    <Button
+        android:id="@+id/btnUpperRec"
+        android:layout_below="@id/btnDecode"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Upper rec">
+    </Button>
+    <Button
+        android:id="@+id/btnUpperPlay"
+        android:layout_below="@id/btnUpperRec"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Upper play">
+    </Button>
+    <Button
+        android:id="@+id/btnNativeRec"
+        android:layout_below="@id/btnUpperPlay"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Native rec">
+    </Button>
+    <Button
+        android:id="@+id/btnExtractor"
+        android:layout_below="@id/btnNativeRec"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Extractor">
+    </Button>
+</RelativeLayout>
