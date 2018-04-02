@@ -42,7 +42,7 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
   private LinearLayout llLocalSurface;
   
   private NativeWebRtcContextRegistry contextRegistry = null;
-  private MediaEngine mediaEngine = null;
+  static public MediaEngine mediaEngine = null;
   
    
   @Override
@@ -68,7 +68,18 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     mediaEngine = new MediaEngine(this);
     mediaEngine.setRemoteIp(destip);//127.0.0.1 192.168.250.208
     mediaEngine.setTrace(true);
-
+    mediaEngine.setSendVideo(true);
+    
+    mediaEngine.setReceiveVideo(true);
+    
+    mediaEngine.setVideoCodec(0);
+    // TODO(hellner): resolutions should probably be in the xml as well.
+    mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
+    mediaEngine.setVideoTxPort(11111);
+    mediaEngine.setVideoRxPort(11111);
+    mediaEngine.setNack(true);
+    
+    
     int play = SysConfig.getSavePlay(this);
     if((play&0x4)==0x4)
     {
@@ -81,17 +92,6 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     }
     else
     	mediaEngine.setAudio(false);
-
-
-    mediaEngine.setReceiveVideo(true);
-    mediaEngine.setSendVideo(true);
-    mediaEngine.setVideoCodec(0);
-    // TODO(hellner): resolutions should probably be in the xml as well.
-    mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
-    mediaEngine.setVideoTxPort(11111);
-    mediaEngine.setVideoRxPort(11111);
-    mediaEngine.setNack(true);
-    mediaEngine.setViewSelection(0);
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     

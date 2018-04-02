@@ -75,7 +75,6 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
     mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
     mediaEngine.setVideoTxPort(11111);
     mediaEngine.setNack(true);
-    mediaEngine.setViewSelection(0);
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     

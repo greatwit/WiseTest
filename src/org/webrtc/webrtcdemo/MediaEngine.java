@@ -47,6 +47,8 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   };
   // Arbitrary choice of 4/5 volume (204/256).
   private static final int volumeLevel = 204;
+  
+  VideoCaptureAndroid mVideoCapture = new VideoCaptureAndroid(1, 0);
 
   public static int numberOfResolutions() { return RESOLUTIONS.length; }
 
@@ -137,7 +139,7 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   private int currentCameraHandle;
   private boolean enableNack;
   // openGl, surfaceView or mediaCodec (integers.xml)
-  private int viewSelection;
+  //private int viewSelection;
   private boolean videoRtpDump;
 
   private SurfaceView svLocal;
@@ -471,8 +473,9 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     if (!vieRunning) {
       return;
     }
-    check(vie.stopSend(videoChannel) == 0, "StopSend");
     stopCamera();
+    check(vie.stopSend(videoChannel) == 0, "StopSend");
+    
 //    check(vie.stopReceive(videoChannel) == 0, "StopReceive");
 //    if (externalCodec != null) {
 //      check(vie.deRegisterExternalReceiveCodec(videoChannel,
@@ -607,20 +610,29 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     cameraInfo.dispose();
     check(vie.connectCaptureDevice(currentCameraHandle, videoChannel) == 0,
         "Failed to connect capture device");
+    check(vie.startCapture(currentCameraHandle) == 0, "Failed StartCapture");
+    
     // Camera and preview surface.
     svLocal = new SurfaceView(context);
-    VideoCaptureAndroid.setLocalPreview(svLocal.getHolder());
-    check(vie.startCapture(currentCameraHandle) == 0, "Failed StartCapture");
+    mVideoCapture.setLocalPreview(svLocal.getHolder());
+    mVideoCapture.startCapture(640, 480, 2000, 35000);
     compensateRotation();
   }
 
   private void stopCamera() {
-    check(vie.stopCapture(currentCameraHandle) == 0, "Failed StopCapture");
-    svLocal = null;
-    check(vie.releaseCaptureDevice(currentCameraHandle) == 0,
+	  mVideoCapture.stopCapture();
+	  
+	  check(vie.stopCapture(currentCameraHandle) == 0, "Failed StopCapture");
+	  svLocal = null;
+	  check(vie.releaseCaptureDevice(currentCameraHandle) == 0,
         "Failed ReleaseCaptureDevice");
   }
 
+  public int provideCameraBuffer(byte[] javaCameraFrame, int length)
+  {
+	  return vie.provideCameraBuffer(currentCameraHandle, javaCameraFrame, length);
+  }
+  
   private boolean hasFrontCamera() {
     return cameras[CameraInfo.CAMERA_FACING_FRONT] != null;
   }
@@ -633,11 +645,6 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     return svLocal;
   }
 
-  public void setViewSelection(int viewSelection) {
-    this.viewSelection = viewSelection;
-  }
-
-  public int viewSelection() { return viewSelection; }
 
   public boolean nackEnabled() { return enableNack; }
 

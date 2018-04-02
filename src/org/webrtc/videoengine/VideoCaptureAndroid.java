@@ -13,16 +13,14 @@ package org.webrtc.videoengine;
 import java.io.IOException;
 import java.util.concurrent.Exchanger;
 
-import android.content.Context;
+import com.example.wisetest.WebrtcActivity;
+
 import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera;
-import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
+
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.SurfaceHolder.Callback;
@@ -37,63 +35,41 @@ import android.view.SurfaceHolder;
 // uncontended.  Note that each of these synchronized methods must check
 // |camera| for null to account for having possibly waited for stopCapture() to
 // complete.
+@SuppressWarnings("deprecation")
 public class VideoCaptureAndroid implements PreviewCallback, Callback {
   private final static String TAG = "WEBRTC-JC";
 
-  private static SurfaceHolder localPreview;
+  private SurfaceHolder localPreview;
   private Camera camera;  // Only non-null while capturing.
   private CameraThread cameraThread;
   private Handler cameraThreadHandler;
-  private final int id;
-  private final Camera.CameraInfo info;
-  private final OrientationEventListener orientationListener;
-  private final long native_capturer;  // |VideoCaptureAndroid*| in C++.
-  private SurfaceTexture cameraSurfaceTexture;
-  private int[] cameraGlTextures = null;
+  //private static int id;
+  
+  //private final Camera.CameraInfo info;
+  //private final OrientationEventListener orientationListener;
+  //private final long native_capturer;  // |VideoCaptureAndroid*| in C++.
+
   // Arbitrary queue depth.  Higher number means more memory allocated & held,
   // lower number means more sensitivity to processing time in the client (and
   // potentially stalling the capturer if it runs out of buffers to write to).
   private final int numCaptureBuffers = 3;
-  private double averageDurationMs;
-  private long lastCaptureTimeMs;
-  private int frameCount;
 
   // Requests future capturers to send their frames to |localPreview| directly.
-  public static void setLocalPreview(SurfaceHolder localPreview) {
+  public void setLocalPreview(SurfaceHolder localPreview) {
     // It is a gross hack that this is a class-static.  Doing it right would
     // mean plumbing this through the C++ API and using it from
     // webrtc/examples/android/media_demo's MediaEngine class.
-    VideoCaptureAndroid.localPreview = localPreview;
+    this.localPreview = localPreview;
   }
 
   public VideoCaptureAndroid(int id, long native_capturer) {
-    this.id = id;
-    this.native_capturer = native_capturer;
-    this.info = new Camera.CameraInfo();
-    Camera.getCameraInfo(id, info);
-
-    // Must be the last thing in the ctor since we pass a reference to |this|!
-    final VideoCaptureAndroid self = this;
-    orientationListener = new OrientationEventListener(GetContext()) {
-        @Override public void onOrientationChanged(int degrees) {
-          if (degrees == OrientationEventListener.ORIENTATION_UNKNOWN) {
-            return;
-          }
-          if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            degrees = (info.orientation - degrees + 360) % 360;
-          } else {  // back-facing
-            degrees = (info.orientation + degrees) % 360;
-          }
-          self.OnOrientationChanged(self.native_capturer, degrees);
-        }
-      };
     // Don't add any code here; see the comment above |self| above!
   }
 
   // Return the global application context.
-  private static native Context GetContext();
+  //private static native Context GetContext();
   // Request frame rotation post-capture.
-  private native void OnOrientationChanged(long captureObject, int degrees);
+  //private native void OnOrientationChanged(long captureObject, int degrees);
 
   private class CameraThread extends Thread {
     private Exchanger<Handler> handlerExchanger;
@@ -113,7 +89,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
   // Note that this actually opens the camera, and Camera callbacks run on the
   // thread that calls open(), so this is done on the CameraThread.  Since ViE
   // API needs a synchronous success return value we wait for the result.
-  private synchronized boolean startCapture(
+  public synchronized boolean startCapture(
       final int width, final int height,
       final int min_mfps, final int max_mfps) {
     Log.d(TAG, "startCapture: " + width + "x" + height + "@" +
@@ -133,7 +109,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         }
       });
     boolean startResult = exchange(result, false); // |false| is a dummy value.
-    orientationListener.enable();
+    //orientationListener.enable();
     return startResult;
   }
 
@@ -142,40 +118,13 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
       Exchanger<Boolean> result) {
     Throwable error = null;
     try {
-      camera = Camera.open(id);
+      camera = Camera.open(1); //id
 
       if (localPreview != null) {
         localPreview.addCallback(this);
         if (localPreview.getSurface() != null &&
             localPreview.getSurface().isValid()) {
           camera.setPreviewDisplay(localPreview);
-        }
-      } else {
-        // No local renderer (we only care about onPreviewFrame() buffers, not a
-        // directly-displayed UI element).  Camera won't capture without
-        // setPreview{Texture,Display}, so we create a SurfaceTexture and hand
-        // it over to Camera, but never listen for frame-ready callbacks,
-        // and never call updateTexImage on it.
-        try {
-          cameraGlTextures = new int[1];
-          // Generate one texture pointer and bind it as an external texture.
-          GLES20.glGenTextures(1, cameraGlTextures, 0);
-          GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-              cameraGlTextures[0]);
-          GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-              GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-          GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-              GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-          GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-              GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-          GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
-              GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-
-          cameraSurfaceTexture = new SurfaceTexture(cameraGlTextures[0]);
-          cameraSurfaceTexture.setOnFrameAvailableListener(null);
-          camera.setPreviewTexture(cameraSurfaceTexture);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
         }
       }
 
@@ -186,7 +135,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         parameters.setVideoStabilization(true);
       }
       parameters.setPreviewSize(width, height);
-      parameters.setPreviewFpsRange(min_mfps, max_mfps);
+      //parameters.setPreviewFpsRange(min_mfps, max_mfps);
       int format = ImageFormat.NV21;
       parameters.setPreviewFormat(format);
       camera.setParameters(parameters);
@@ -195,8 +144,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         camera.addCallbackBuffer(new byte[bufSize]);
       }
       camera.setPreviewCallbackWithBuffer(this);
-      frameCount = 0;
-      averageDurationMs = 1000 / max_mfps;
+      //averageDurationMs = 1000 / max_mfps;
       camera.startPreview();
       exchange(result, true);
       return;
@@ -216,9 +164,9 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
   }
 
   // Called by native code.  Returns true when camera is known to be stopped.
-  private synchronized boolean stopCapture() {
+  public synchronized boolean stopCapture() {
     Log.d(TAG, "stopCapture");
-    orientationListener.disable();
+    //orientationListener.disable();
     final Exchanger<Boolean> result = new Exchanger<Boolean>();
     cameraThreadHandler.post(new Runnable() {
         @Override public void run() {
@@ -249,13 +197,6 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
       if (localPreview != null) {
         localPreview.removeCallback(this);
         camera.setPreviewDisplay(null);
-      } else {
-        camera.setPreviewTexture(null);
-        cameraSurfaceTexture = null;
-        if (cameraGlTextures != null) {
-          GLES20.glDeleteTextures(1, cameraGlTextures, 0);
-          cameraGlTextures = null;
-        }
       }
       camera.release();
       camera = null;
@@ -273,34 +214,20 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     return;
   }
 
-  private native void ProvideCameraFrame(
-      byte[] data, int length, long timeStamp, long captureObject);
-
   // Called on cameraThread so must not "synchronized".
   @Override
   public void onPreviewFrame(byte[] data, Camera callbackCamera) {
     if (Thread.currentThread() != cameraThread) {
       throw new RuntimeException("Camera callback not on camera thread?!?");
-    }
+    } 
+    Log.w(TAG, "Provide:"+data.length);
     if (camera == null) {
       return;
     }
     if (camera != callbackCamera) {
       throw new RuntimeException("Unexpected camera in callback!");
     }
-    frameCount++;
-    long captureTimeMs = SystemClock.elapsedRealtime();
-    if (frameCount > 1) {
-      double durationMs = captureTimeMs - lastCaptureTimeMs;
-      averageDurationMs = 0.9 * averageDurationMs + 0.1 * durationMs;
-      if ((frameCount % 30) == 0) {
-        Log.d(TAG, "Camera TS " + captureTimeMs +
-            ". Duration: " + (int)durationMs + " ms. FPS: " +
-            (int) (1000 / averageDurationMs + 0.5));
-      }
-    }
-    lastCaptureTimeMs = captureTimeMs;
-    ProvideCameraFrame(data, data.length, captureTimeMs, native_capturer);
+    WebrtcActivity.mediaEngine.provideCameraBuffer(data, data.length);
     camera.addCallbackBuffer(data);
   }
 
@@ -328,6 +255,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     Log.v(TAG, "setPreviewRotation:" + rotation);
 
     int resultRotation = 0;
+    /*
     if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
       // This is a front facing camera.  SetDisplayOrientation will flip
       // the image horizontally before doing the rotation.
@@ -336,6 +264,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
       // Back-facing camera.
       resultRotation = rotation;
     }
+    */
     camera.setDisplayOrientation(resultRotation);
     exchange(result, null);
   }
