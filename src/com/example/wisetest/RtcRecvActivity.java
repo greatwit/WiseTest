@@ -10,6 +10,7 @@
 
 package com.example.wisetest;
 
+import org.webrtc.videoengine.VideoCaptureDeviceInfoAndroid;
 import org.webrtc.webrtcdemo.MediaEngine;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.NativeWebRtcContextRegistry;
@@ -18,18 +19,18 @@ import com.example.wisetest.recorder.util.SysConfig;
 
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class WebrtcActivity extends Activity  implements MediaEngineObserver
+public class RtcRecvActivity extends Activity  implements MediaEngineObserver
 {
 
   private String  TAG = "WebrtcActivity";
@@ -49,6 +50,7 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     // Global settings.
+    requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     
@@ -95,17 +97,6 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     
-    Button btSwitchCamera = (Button) findViewById(R.id.btSwitchCamera);
-    if (getEngine().hasMultipleCameras()) {
-      btSwitchCamera.setOnClickListener(new View.OnClickListener() {
-        public void onClick(View button) {
-          toggleCamera((Button) button);
-        }
-        });
-    } else {
-      btSwitchCamera.setEnabled(false);
-    }
-    btSwitchCamera.setText(getEngine().frontCameraIsSet() ? R.string.backCamera : R.string.frontCamera);
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
     btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
@@ -119,6 +110,8 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     Log.w(TAG, "spCodecSize.setSelection:"+ SysConfig.getSaveResolution(this) );
 
     getEngine().setObserver(this);
+    
+    Log.i(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
   }
   
   private MediaEngine getEngine() { return mediaEngine; }
@@ -128,11 +121,11 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     if (remoteSurfaceView != null) {
       llRemoteSurface.addView(remoteSurfaceView);
     }
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-    svLocal.setZOrderOnTop(true);
-    if (svLocal != null) {
-      llLocalSurface.addView(svLocal);
-    }
+//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+//    svLocal.setZOrderOnTop(true);
+//    if (svLocal != null) {
+//      llLocalSurface.addView(svLocal);
+//    }
   }
 
   private void clearViews() {
@@ -140,10 +133,10 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
     if (remoteSurfaceView != null) {
       llRemoteSurface.removeView(remoteSurfaceView);
     }
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-    if (svLocal != null) {
-      llLocalSurface.removeView(svLocal);
-    }
+//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+//    if (svLocal != null) {
+//      llLocalSurface.removeView(svLocal);
+//    }
   }
 
   // tvStats need to be updated on the UI thread.
@@ -156,16 +149,16 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
   }
 
   private void toggleCamera(Button btSwitchCamera) {
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-    boolean resetLocalView = svLocal != null;
-    if (resetLocalView) {
-      llLocalSurface.removeView(svLocal);
-    }
-    getEngine().toggleCamera();
-    if (resetLocalView) {
-      svLocal = getEngine().getLocalSurfaceView();
-      llLocalSurface.addView(svLocal);
-    }
+//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+//    boolean resetLocalView = svLocal != null;
+//    if (resetLocalView) {
+//      llLocalSurface.removeView(svLocal);
+//    }
+//    getEngine().toggleCamera();
+//    if (resetLocalView) {
+//      svLocal = getEngine().getLocalSurfaceView();
+//      llLocalSurface.addView(svLocal);
+//    }
     btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
         R.string.backCamera :
         R.string.frontCamera);
@@ -182,11 +175,11 @@ public class WebrtcActivity extends Activity  implements MediaEngineObserver
 
   public void stopAll() {
     clearViews();
-    getEngine().stop();
+    getEngine().stopVideoRecv();
   }
 
   private void startCall() {
-    getEngine().start();
+    getEngine().startVideoRecv();
     setViews();
   }
   

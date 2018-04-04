@@ -1,20 +1,12 @@
-/*
- *  Copyright (c) 2012 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
- */
 
 package org.webrtc.videoengine;
 
 import java.io.IOException;
 import java.util.concurrent.Exchanger;
 
-import com.example.wisetest.WebrtcActivity;
+import com.example.wisetest.RtcCameraActivity;
 
+import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera;
@@ -22,9 +14,9 @@ import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.OrientationEventListener;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 // Wrapper for android Camera, with support for direct local preview rendering.
 // Threading notes: this class is called from ViE C++ code, and from Camera &
@@ -36,9 +28,10 @@ import android.view.SurfaceHolder;
 // |camera| for null to account for having possibly waited for stopCapture() to
 // complete.
 @SuppressWarnings("deprecation")
-public class VideoCaptureAndroid implements PreviewCallback, Callback {
+public class VideoCaptureShow implements PreviewCallback, Callback {
   private final static String TAG = "WEBRTC-JC";
 
+  private SurfaceView svLocal;
   private SurfaceHolder localPreview;
   private Camera camera;  // Only non-null while capturing.
   private CameraThread cameraThread;
@@ -55,15 +48,21 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
   private final int numCaptureBuffers = 3;
 
   // Requests future capturers to send their frames to |localPreview| directly.
-  public void setLocalPreview(SurfaceHolder localPreview) {
+  public void setLocalPreview(Context context) {
     // It is a gross hack that this is a class-static.  Doing it right would
     // mean plumbing this through the C++ API and using it from
     // webrtc/examples/android/media_demo's MediaEngine class.
-    this.localPreview = localPreview;
+
   }
 
-  public VideoCaptureAndroid(int id, long native_capturer) {
+  public SurfaceView getLocalSurfaceView() {
+	    return svLocal;
+	  }
+  
+  public VideoCaptureShow(Context context, int id, long native_capturer) {
     // Don't add any code here; see the comment above |self| above!
+		svLocal = new SurfaceView(context);
+		localPreview = svLocal.getHolder();
   }
 
   // Return the global application context.
@@ -135,6 +134,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         parameters.setVideoStabilization(true);
       }
       parameters.setPreviewSize(width, height);
+      //parameters.setRotation(90);
       //parameters.setPreviewFpsRange(min_mfps, max_mfps);
       int format = ImageFormat.NV21;
       parameters.setPreviewFormat(format);
@@ -145,8 +145,10 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
       }
       camera.setPreviewCallbackWithBuffer(this);
       //averageDurationMs = 1000 / max_mfps;
+      camera.setDisplayOrientation(90);
       camera.startPreview();
       exchange(result, true);
+      
       return;
     } catch (IOException e) {
       error = e;
@@ -181,6 +183,8 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     }
     cameraThreadHandler = null;
     cameraThread = null;
+    svLocal = null;
+    
     Log.d(TAG, "stopCapture done");
     return status;
   }
@@ -227,7 +231,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     if (camera != callbackCamera) {
       throw new RuntimeException("Unexpected camera in callback!");
     }
-    WebrtcActivity.mediaEngine.provideCameraBuffer(data, data.length);
+    RtcCameraActivity.mediaEngine.provideCameraBuffer(data, data.length);
     camera.addCallbackBuffer(data);
   }
 

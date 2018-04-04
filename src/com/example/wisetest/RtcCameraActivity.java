@@ -1,15 +1,7 @@
-/*
- *  Copyright (c) 2013 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
- */
 
 package com.example.wisetest;
 
+import org.webrtc.videoengine.VideoCaptureShow;
 import org.webrtc.webrtcdemo.MediaEngine;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.NativeWebRtcContextRegistry;
@@ -18,21 +10,26 @@ import com.example.wisetest.recorder.util.SysConfig;
 
 
 import android.app.Activity;
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
+
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.SurfaceHolder.Callback;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class CameraTestActivity extends Activity  implements MediaEngineObserver
+@SuppressWarnings({ "deprecation" })
+public class RtcCameraActivity extends Activity implements MediaEngineObserver
 {
-
-  private String  TAG = "WebrtcActivity";
+  private String  TAG = getClass().getSimpleName();
 
   private ImageButton btStartStopCall;
   private TextView tvStats;
@@ -40,10 +37,11 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
   // Remote and local stream displays.
   private LinearLayout llLocalSurface;
   
-  private NativeWebRtcContextRegistry contextRegistry = null;
-  private MediaEngine mediaEngine = null;
+  private VideoCaptureShow mVideoCapture;
   
-   
+  private NativeWebRtcContextRegistry contextRegistry = null;
+  static public MediaEngine mediaEngine = null;
+  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -102,13 +100,14 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
     Log.w(TAG, "spCodecSize.setSelection:"+ SysConfig.getSaveResolution(this) );
 
     getEngine().setObserver(this);
+    
+    mVideoCapture = new VideoCaptureShow(this, 1, 0);
   }
   
   private MediaEngine getEngine() { return mediaEngine; }
 
   private void setViews() {
-
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+    SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
     //svLocal.setZOrderOnTop(true);
     if (svLocal != null) {
       llLocalSurface.addView(svLocal);
@@ -116,7 +115,7 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
   }
 
   private void clearViews() {
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+    SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
     if (svLocal != null) {
       llLocalSurface.removeView(svLocal);
     }
@@ -132,14 +131,14 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
   }
 
   private void toggleCamera(Button btSwitchCamera) {
-    SurfaceView svLocal = getEngine().getLocalSurfaceView();
+    SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
     boolean resetLocalView = svLocal != null;
     if (resetLocalView) {
       llLocalSurface.removeView(svLocal);
     }
     getEngine().toggleCamera();
     if (resetLocalView) {
-      svLocal = getEngine().getLocalSurfaceView();
+      svLocal = mVideoCapture.getLocalSurfaceView();
       llLocalSurface.addView(svLocal);
     }
     btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
@@ -149,7 +148,7 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
 
   public void toggleStart() {
     if (getEngine().isRunning()) {
-      stopAll();
+    	stopAll();
     } else {
       startCall();
     }
@@ -157,24 +156,29 @@ public class CameraTestActivity extends Activity  implements MediaEngineObserver
   }
 
   public void stopAll() {
+	mVideoCapture.stopCapture();
     clearViews();
-    getEngine().stop();
+    getEngine().stopVideoSend();
   }
 
   private void startCall() {
-    getEngine().start();
+    getEngine().startVideoSend();
+    mVideoCapture.startCapture(640, 480, 2000, 35000);
     setViews();
   }
   
   @Override
-  public void onDestroy() 
+  public void onDestroy()
   {
 	    if (getEngine().isRunning())
 	       stopAll();
+	    
 	    mediaEngine.dispose();
 	    contextRegistry.unRegister();
 	    super.onDestroy();
   }
+
+
   
 }
 

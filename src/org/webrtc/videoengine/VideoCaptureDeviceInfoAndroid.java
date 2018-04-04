@@ -30,7 +30,7 @@ public class VideoCaptureDeviceInfoAndroid {
     return info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
   }
 
-  private static String deviceUniqueName(int index, CameraInfo info) {
+  public static String deviceUniqueName(int index, CameraInfo info) {
     return "Camera " + index +", Facing " +
         (isFrontFacing(info) ? "front" : "back") +
         ", Orientation "+ info.orientation;
@@ -41,7 +41,7 @@ public class VideoCaptureDeviceInfoAndroid {
   // this reflects static information about the hardware present, there is no
   // need to call this function more than once in a single process.  It is
   // marked "private" as it is only called by native code.
-private static String getDeviceInfo() { 
+public static String getDeviceInfo() { 
     try {
       JSONArray devices = new JSONArray();
       for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {

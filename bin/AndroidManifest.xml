@@ -30,8 +30,8 @@
         <activity android:name=".RecNativeActivity" android:screenOrientation="portrait"/>
         <activity android:name=".RecUpperActivity" android:screenOrientation="portrait"/>
         <activity android:name=".PermissionActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".WebrtcActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".CameraTestActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".RtcRecvActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".RtcCameraActivity" android:screenOrientation="portrait"/>
         <activity android:name=".ExtractorActivity" android:screenOrientation="portrait"/>
         <activity android:name=".recorder.CustomRecordActivity" />
         <activity android:name=".recorder.PlayVideoActivity" />

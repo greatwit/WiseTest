@@ -11,7 +11,7 @@
 package org.webrtc.webrtcdemo;
 
 import org.webrtc.videoengine.ViERenderer;
-import org.webrtc.videoengine.VideoCaptureAndroid;
+import org.webrtc.videoengine.VideoCaptureShow;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -48,7 +48,7 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   // Arbitrary choice of 4/5 volume (204/256).
   private static final int volumeLevel = 204;
   
-  VideoCaptureAndroid mVideoCapture = new VideoCaptureAndroid(1, 0);
+  
 
   public static int numberOfResolutions() { return RESOLUTIONS.length; }
 
@@ -100,7 +100,6 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   // Shared Audio/Video members.
   private final Context context;
   private String remoteIp;
-  private boolean enableTrace;
 
     // Audio
   private VoiceEngine voe;
@@ -142,7 +141,7 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   //private int viewSelection;
   private boolean videoRtpDump;
 
-  private SurfaceView svLocal;
+  //private SurfaceView svLocal;
   private SurfaceView svRemote;
   MediaCodecVideoDecoder externalCodec;
 
@@ -156,7 +155,8 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   private OrientationEventListener orientationListener;
   private int deviceOrientation = OrientationEventListener.ORIENTATION_UNKNOWN;
 
-  public MediaEngine(Context context) {
+  public MediaEngine(Context context) 
+  {
     this.context = context;
     voe = new VoiceEngine();
     check(voe.init() == 0, "Failed voe Init");
@@ -194,7 +194,7 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
         new OrientationEventListener(context, SensorManager.SENSOR_DELAY_UI) {
           public void onOrientationChanged (int orientation) {
             deviceOrientation = orientation;
-            compensateRotation();
+            //compensateRotation();
           }
         };
     orientationListener.enable();
@@ -443,6 +443,71 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     audioManager.setSpeakerphoneOn(useSpeaker);
   }
 
+  public void startVideoSend()
+  {
+	  check(!vieRunning, "ViE already started");
+	  
+      if (sendVideo) {
+        startCamera();
+        check(vie.startSend(videoChannel) == 0, "Failed StartSend");
+      }
+	  vieRunning = true;
+  }
+  
+  public void stopVideoSend()
+  {
+	  if (!vieRunning) {
+	        return;
+      }
+      stopCamera();
+      check(vie.stopSend(videoChannel) == 0, "StopSend");
+
+      vieRunning = false;
+  }
+  
+  public void startVideoRecv()
+  {
+	    check(!vieRunning, "ViE already started");
+
+	    if (receiveVideo) 
+	    {
+	      svRemote = ViERenderer.CreateRenderer(context, true);//true opengl,false surfaceview
+	      
+	      if (externalCodec != null) {
+	        check(vie.registerExternalReceiveCodec(videoChannel,
+	                VCM_VP8_PAYLOAD_TYPE, externalCodec, true) == 0,
+	        		"Failed to register external decoder");
+	      } else {
+	        check(vie.addRenderer(videoChannel, svRemote,
+	                0, 0, 0, 1, 1) == 0, "Failed AddRenderer");
+	        check(vie.startRender(videoChannel) == 0, "Failed StartRender");
+	      }
+	      
+	      check(vie.startReceive(videoChannel) == 0, "Failed StartReceive");
+	    }
+	    vieRunning = true;
+  }
+  
+  public void stopVideoRecv()
+  {
+	      if (!vieRunning) {
+	        return;
+	      }
+	      
+	      check(vie.stopReceive(videoChannel) == 0, "StopReceive");
+	      if (externalCodec != null) {
+	        check(vie.deRegisterExternalReceiveCodec(videoChannel,
+	                VCM_VP8_PAYLOAD_TYPE) == 0,
+	                "Failed to deregister external decoder");
+	        externalCodec.dispose();
+	        externalCodec = null;
+	      } else {
+	        check(vie.stopRender(videoChannel) == 0, "StopRender");
+	        check(vie.removeRenderer(videoChannel) == 0, "RemoveRenderer");
+	      }
+	      vieRunning = false;
+  }
+  
   public void startViE() {
     check(!vieRunning, "ViE already started");
 
@@ -476,17 +541,17 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     stopCamera();
     check(vie.stopSend(videoChannel) == 0, "StopSend");
     
-//    check(vie.stopReceive(videoChannel) == 0, "StopReceive");
-//    if (externalCodec != null) {
-//      check(vie.deRegisterExternalReceiveCodec(videoChannel,
-//              VCM_VP8_PAYLOAD_TYPE) == 0,
-//              "Failed to deregister external decoder");
-//      externalCodec.dispose();
-//      externalCodec = null;
-//    } else {
-//      check(vie.stopRender(videoChannel) == 0, "StopRender");
-//      check(vie.removeRenderer(videoChannel) == 0, "RemoveRenderer");
-//    }
+    check(vie.stopReceive(videoChannel) == 0, "StopReceive");
+    if (externalCodec != null) {
+      check(vie.deRegisterExternalReceiveCodec(videoChannel,
+              VCM_VP8_PAYLOAD_TYPE) == 0,
+              "Failed to deregister external decoder");
+      externalCodec.dispose();
+      externalCodec = null;
+    } else {
+      check(vie.stopRender(videoChannel) == 0, "StopRender");
+      check(vie.removeRenderer(videoChannel) == 0, "RemoveRenderer");
+    }
     svRemote = null;
     vieRunning = false;
   }
@@ -613,19 +678,18 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
     check(vie.startCapture(currentCameraHandle) == 0, "Failed StartCapture");
     
     // Camera and preview surface.
-    svLocal = new SurfaceView(context);
-    mVideoCapture.setLocalPreview(svLocal.getHolder());
-    mVideoCapture.startCapture(640, 480, 2000, 35000);
+    
+    //mVideoCapture.setLocalPreview(svLocal.getHolder());
+    //mVideoCapture.startCapture(640, 480, 2000, 35000);
     compensateRotation();
   }
 
   private void stopCamera() {
-	  mVideoCapture.stopCapture();
+	  //mVideoCapture.stopCapture();
 	  
 	  check(vie.stopCapture(currentCameraHandle) == 0, "Failed StopCapture");
-	  svLocal = null;
-	  check(vie.releaseCaptureDevice(currentCameraHandle) == 0,
-        "Failed ReleaseCaptureDevice");
+	  check(vie.releaseCaptureDevice(currentCameraHandle) == 0, "Failed ReleaseCaptureDevice");
+	  
   }
 
   public int provideCameraBuffer(byte[] javaCameraFrame, int length)
@@ -639,10 +703,6 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
 
   public SurfaceView getRemoteSurfaceView() {
     return svRemote;
-  }
-
-  public SurfaceView getLocalSurfaceView() {
-    return svLocal;
   }
 
 
@@ -742,10 +802,6 @@ public class MediaEngine implements VideoDecodeEncodeObserver {
   }
 
   private void compensateRotation() {
-    if (svLocal == null) {
-      // Not rendering (or sending).
-      return;
-    }
     if (deviceOrientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
       return;
     }
