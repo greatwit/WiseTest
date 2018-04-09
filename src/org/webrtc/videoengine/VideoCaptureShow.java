@@ -59,7 +59,7 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
 	    return svLocal;
 	  }
   
-  public VideoCaptureShow(Context context, int id, long native_capturer) {
+  public VideoCaptureShow(Context context) {
     // Don't add any code here; see the comment above |self| above!
 		svLocal = new SurfaceView(context);
 		localPreview = svLocal.getHolder();
@@ -223,16 +223,19 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
   public void onPreviewFrame(byte[] data, Camera callbackCamera) {
     if (Thread.currentThread() != cameraThread) {
       throw new RuntimeException("Camera callback not on camera thread?!?");
-    } 
-    Log.w(TAG, "Provide:"+data.length);
+    }
+    
     if (camera == null) {
       return;
     }
+    
     if (camera != callbackCamera) {
       throw new RuntimeException("Unexpected camera in callback!");
     }
-    RtcCameraActivity.mediaEngine.provideCameraBuffer(data, data.length);
+    
+    RtcCameraActivity.mVideoEngine.provideCameraBuffer(data, data.length);
     camera.addCallbackBuffer(data);
+    //Log.w(TAG, "Provide:"+data.length);
   }
 
   // Sets the rotation of the preview render window.
@@ -337,4 +340,6 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
       throw new RuntimeException(e);
     }
   }
+  
 }
+

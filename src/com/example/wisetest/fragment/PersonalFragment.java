@@ -1,7 +1,8 @@
 package com.example.wisetest.fragment;
 
-import org.webrtc.webrtcdemo.MediaEngine;
 import org.webrtc.webrtcdemo.SpinnerAdapter;
+import org.webrtc.webrtcdemo.VideoEngine;
+
 import com.example.wisetest.R;
 import com.example.wisetest.recorder.util.SysConfig;
 
@@ -49,7 +50,7 @@ public class PersonalFragment extends Fragment
 		Spinner spCodecSize = (Spinner) view.findViewById(R.id.spCodecSize);
 	    SpinnerAdapter adapter = new SpinnerAdapter(mContext);
 	    spCodecSize.setAdapter(adapter);
-	    adapter.setDatas(MediaEngine.resolutionsAsString());
+	    adapter.setDatas(VideoEngine.resolutionsAsString());
 	    spCodecSize.setSelection(SysConfig.getSaveResolution(mContext));
 	    spCodecSize.setOnItemSelectedListener(new OnItemSelectedListener() 
 	    {

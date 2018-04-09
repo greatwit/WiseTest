@@ -2,32 +2,27 @@
 package com.example.wisetest;
 
 import org.webrtc.videoengine.VideoCaptureShow;
-import org.webrtc.webrtcdemo.MediaEngine;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.NativeWebRtcContextRegistry;
+import org.webrtc.webrtcdemo.VideoEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
 
 
 import android.app.Activity;
-import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.SurfaceHolder.Callback;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-@SuppressWarnings({ "deprecation" })
-public class RtcCameraActivity extends Activity implements MediaEngineObserver
+public class RtcCameraActivity extends Activity// implements MediaEngineObserver
 {
   private String  TAG = getClass().getSimpleName();
 
@@ -39,8 +34,9 @@ public class RtcCameraActivity extends Activity implements MediaEngineObserver
   
   private VideoCaptureShow mVideoCapture;
   
-  private NativeWebRtcContextRegistry contextRegistry = null;
-  static public MediaEngine mediaEngine = null;
+  
+  //static public MediaEngine mediaEngine = null;
+  static public VideoEngine mVideoEngine;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +54,7 @@ public class RtcCameraActivity extends Activity implements MediaEngineObserver
     setContentView(R.layout.activity_webrtc);
     llLocalSurface  = (LinearLayout) findViewById(R.id.llRemoteView);
 
-    // Must be instantiated before MediaEngine.
-    contextRegistry = new NativeWebRtcContextRegistry();
-    contextRegistry.register(this);
-
+/*
     // Load all settings dictated in xml.
     mediaEngine = new MediaEngine(this);
     mediaEngine.setRemoteIp(destip);//127.0.0.1 192.168.250.208
@@ -73,38 +66,42 @@ public class RtcCameraActivity extends Activity implements MediaEngineObserver
     mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
     mediaEngine.setVideoTxPort(11111);
     mediaEngine.setNack(true);
+    */
+    
+    mVideoEngine = new VideoEngine(this);
+    mVideoEngine.initEngine();
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     
     Button btSwitchCamera = (Button) findViewById(R.id.btSwitchCamera);
-    if (getEngine().hasMultipleCameras()) {
-      btSwitchCamera.setOnClickListener(new View.OnClickListener() {
-        public void onClick(View button) {
-          toggleCamera((Button) button);
-        }
-        });
-    } else {
+//    if (getEngine().hasMultipleCameras()) {
+//      btSwitchCamera.setOnClickListener(new View.OnClickListener() {
+//        public void onClick(View button) {
+//          toggleCamera((Button) button);
+//        }
+//        });
+//    } else {
       btSwitchCamera.setEnabled(false);
-    }
-    btSwitchCamera.setText(getEngine().frontCameraIsSet() ? R.string.backCamera : R.string.frontCamera);
+    //}
+    //btSwitchCamera.setText(getEngine().frontCameraIsSet() ? R.string.backCamera : R.string.frontCamera);
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
-    btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
+    //btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
     btStartStopCall.setOnClickListener(new View.OnClickListener() {
         public void onClick(View button) {
-          toggleStart();
+        	toggleStart();
         }
       });
     
-    getEngine().setResolutionIndex(SysConfig.getSaveResolution(this));
+    //getEngine().setResolutionIndex(SysConfig.getSaveResolution(this));
     Log.w(TAG, "spCodecSize.setSelection:"+ SysConfig.getSaveResolution(this) );
 
-    getEngine().setObserver(this);
+    //getEngine().setObserver(this);
     
-    mVideoCapture = new VideoCaptureShow(this, 1, 0);
+    mVideoCapture = new VideoCaptureShow(this);
   }
   
-  private MediaEngine getEngine() { return mediaEngine; }
+  //private MediaEngine getEngine() { return mediaEngine; }
 
   private void setViews() {
     SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
@@ -130,39 +127,44 @@ public class RtcCameraActivity extends Activity implements MediaEngineObserver
       });
   }
 
+  public void toggleStart() {
+  	if(mVideoEngine.isSendRunning())
+  	{
+         mVideoEngine.stopSend();
+         stopAll();
+  	}else
+  	{
+         mVideoEngine.startSend("192.168.0.190", 11111, true, 3, 1);
+         startCall();
+  	}
+
+    btStartStopCall.setBackgroundResource(mVideoEngine.isSendRunning() ? R.drawable.record_stop : R.drawable.record_start);
+  }
+  
   private void toggleCamera(Button btSwitchCamera) {
     SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
     boolean resetLocalView = svLocal != null;
     if (resetLocalView) {
       llLocalSurface.removeView(svLocal);
     }
-    getEngine().toggleCamera();
+    //getEngine().toggleCamera();
     if (resetLocalView) {
       svLocal = mVideoCapture.getLocalSurfaceView();
       llLocalSurface.addView(svLocal);
     }
-    btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
-        R.string.backCamera :
-        R.string.frontCamera);
-  }
-
-  public void toggleStart() {
-    if (getEngine().isRunning()) {
-    	stopAll();
-    } else {
-      startCall();
-    }
-    btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
+//    btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
+//        R.string.backCamera :
+//        R.string.frontCamera);
   }
 
   public void stopAll() {
 	mVideoCapture.stopCapture();
     clearViews();
-    getEngine().stopVideoSend();
+    //getEngine().stopVideoSend();
   }
 
   private void startCall() {
-    getEngine().startVideoSend();
+    //getEngine().startVideoSend();
     mVideoCapture.startCapture(640, 480, 2000, 35000);
     setViews();
   }
@@ -170,11 +172,11 @@ public class RtcCameraActivity extends Activity implements MediaEngineObserver
   @Override
   public void onDestroy()
   {
-	    if (getEngine().isRunning())
-	       stopAll();
-	    
-	    mediaEngine.dispose();
-	    contextRegistry.unRegister();
+	    if (mVideoEngine.isSendRunning()){
+	    	mVideoEngine.stopSend();
+	        stopAll();
+	    }
+	    mVideoEngine.deInitEngine();
 	    super.onDestroy();
   }
 

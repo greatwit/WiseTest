@@ -94,7 +94,6 @@ public static String getDeviceInfo() {
             .put("mfpsRanges", mfpsRanges);
       }
       String ret = devices.toString(2);
-      Log.d(TAG, ret);
       return ret;
     } catch (JSONException e) {
       throw new RuntimeException(e);

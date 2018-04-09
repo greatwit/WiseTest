@@ -11,5 +11,5 @@
 package org.webrtc.webrtcdemo;
 
 public interface MenuStateProvider {
-  public MediaEngine getEngine();
+  
 }

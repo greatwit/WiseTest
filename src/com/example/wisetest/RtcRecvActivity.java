@@ -10,10 +10,11 @@
 
 package com.example.wisetest;
 
+import org.webrtc.videoengine.ViERenderer;
 import org.webrtc.videoengine.VideoCaptureDeviceInfoAndroid;
-import org.webrtc.webrtcdemo.MediaEngine;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.NativeWebRtcContextRegistry;
+import org.webrtc.webrtcdemo.VideoEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
 
@@ -40,12 +41,12 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
 
   // Remote and local stream displays.
   private LinearLayout llRemoteSurface;
-  private LinearLayout llLocalSurface;
+  SurfaceView remoteSurfaceView;
   
   private NativeWebRtcContextRegistry contextRegistry = null;
-  static public MediaEngine mediaEngine = null;
   
-   
+  static public VideoEngine mVideoEngine;
+  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -60,83 +61,40 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
 	
     setContentView(R.layout.activity_webrtc);
     llRemoteSurface = (LinearLayout) findViewById(R.id.llRemoteView);
-    llLocalSurface  = (LinearLayout) findViewById(R.id.llLocalView);
 
     // Must be instantiated before MediaEngine.
     contextRegistry = new NativeWebRtcContextRegistry();
     contextRegistry.register(this);
 
-    // Load all settings dictated in xml.
-    mediaEngine = new MediaEngine(this);
-    mediaEngine.setRemoteIp(destip);//127.0.0.1 192.168.250.208
-    mediaEngine.setTrace(true);
-    mediaEngine.setSendVideo(true);
-    
-    mediaEngine.setReceiveVideo(true);
-    
-    mediaEngine.setVideoCodec(0);
-    // TODO(hellner): resolutions should probably be in the xml as well.
-    mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
-    mediaEngine.setVideoTxPort(11111);
-    mediaEngine.setVideoRxPort(11111);
-    mediaEngine.setNack(true);
-    
-    
-    int play = SysConfig.getSavePlay(this);
-    if((play&0x4)==0x4)
-    {
-    	mediaEngine.setAudio(true);
-        mediaEngine.setAudioCodec(mediaEngine.getIsacIndex());
-        mediaEngine.setAudioRxPort(11113);
-        mediaEngine.setAudioTxPort(11113);
-        mediaEngine.setSpeaker(false);
-        mediaEngine.setDebuging(false);
-    }
-    else
-    	mediaEngine.setAudio(false);
-    
     tvStats = (TextView) findViewById(R.id.tvStats);
+    setViews();
     
+    mVideoEngine = new VideoEngine(this);
+    mVideoEngine.initEngine();
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
-    btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
+    btStartStopCall.setBackgroundResource(mVideoEngine.isRecvRunning() ? R.drawable.record_stop : R.drawable.record_start);
     btStartStopCall.setOnClickListener(new View.OnClickListener() {
         public void onClick(View button) {
           toggleStart();
         }
       });
     
-    getEngine().setResolutionIndex(SysConfig.getSaveResolution(this));
-    Log.w(TAG, "spCodecSize.setSelection:"+ SysConfig.getSaveResolution(this) );
-
-    getEngine().setObserver(this);
-    
     Log.i(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
   }
   
-  private MediaEngine getEngine() { return mediaEngine; }
 
   private void setViews() {
-    SurfaceView remoteSurfaceView = getEngine().getRemoteSurfaceView();
+    remoteSurfaceView = ViERenderer.CreateRenderer(this, true);
     if (remoteSurfaceView != null) {
       llRemoteSurface.addView(remoteSurfaceView);
     }
-//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-//    svLocal.setZOrderOnTop(true);
-//    if (svLocal != null) {
-//      llLocalSurface.addView(svLocal);
-//    }
   }
 
   private void clearViews() {
-    SurfaceView remoteSurfaceView = getEngine().getRemoteSurfaceView();
     if (remoteSurfaceView != null) {
       llRemoteSurface.removeView(remoteSurfaceView);
     }
-//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-//    if (svLocal != null) {
-//      llLocalSurface.removeView(svLocal);
-//    }
   }
 
   // tvStats need to be updated on the UI thread.
@@ -148,47 +106,23 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
       });
   }
 
-  private void toggleCamera(Button btSwitchCamera) {
-//    SurfaceView svLocal = getEngine().getLocalSurfaceView();
-//    boolean resetLocalView = svLocal != null;
-//    if (resetLocalView) {
-//      llLocalSurface.removeView(svLocal);
-//    }
-//    getEngine().toggleCamera();
-//    if (resetLocalView) {
-//      svLocal = getEngine().getLocalSurfaceView();
-//      llLocalSurface.addView(svLocal);
-//    }
-    btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
-        R.string.backCamera :
-        R.string.frontCamera);
-  }
-
   public void toggleStart() {
-    if (getEngine().isRunning()) {
-      stopAll();
+    if (mVideoEngine.isRecvRunning()) {
+    	mVideoEngine.stopRecv();
     } else {
-      startCall();
+    	mVideoEngine.startRecv(remoteSurfaceView, 11111, true, 3);
     }
-    btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
+    btStartStopCall.setBackgroundResource(mVideoEngine.isRecvRunning() ? R.drawable.record_stop : R.drawable.record_start);
   }
 
-  public void stopAll() {
-    clearViews();
-    getEngine().stopVideoRecv();
-  }
-
-  private void startCall() {
-    getEngine().startVideoRecv();
-    setViews();
-  }
   
   @Override
   public void onDestroy() 
   {
-	    if (getEngine().isRunning())
-	       stopAll();
-	    mediaEngine.dispose();
+	    if (mVideoEngine.isRecvRunning()){
+	    	mVideoEngine.stopRecv();
+	    }
+	    mVideoEngine.deInitEngine();
 	    contextRegistry.unRegister();
 	    super.onDestroy();
   }
