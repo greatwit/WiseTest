@@ -235,7 +235,7 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
     
     RtcCameraActivity.mVideoEngine.provideCameraBuffer(data, data.length);
     camera.addCallbackBuffer(data);
-    //Log.w(TAG, "Provide:"+data.length);
+    Log.w(TAG, "Provide:"+data.length);
   }
 
   // Sets the rotation of the preview render window.

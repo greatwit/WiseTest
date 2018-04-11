@@ -2,8 +2,6 @@
 package com.example.wisetest;
 
 import org.webrtc.videoengine.VideoCaptureShow;
-import org.webrtc.webrtcdemo.MediaEngineObserver;
-import org.webrtc.webrtcdemo.NativeWebRtcContextRegistry;
 import org.webrtc.webrtcdemo.VideoEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
@@ -33,7 +31,7 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
   private LinearLayout llLocalSurface;
   
   private VideoCaptureShow mVideoCapture;
-  
+  private String mDestip;
   
   //static public MediaEngine mediaEngine = null;
   static public VideoEngine mVideoEngine;
@@ -47,9 +45,9 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
             WindowManager.LayoutParams.FLAG_FULLSCREEN);// 设置全屏
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     
-    String destip = SysConfig.getSaveAddr(this);
+    mDestip = SysConfig.getSaveAddr(this);
     
-	Log.w(TAG, "get destip:" + destip );
+	Log.w(TAG, "get destip:" + mDestip );
 	
     setContentView(R.layout.activity_webrtc);
     llLocalSurface  = (LinearLayout) findViewById(R.id.llRemoteView);
@@ -134,7 +132,7 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
          stopAll();
   	}else
   	{
-         mVideoEngine.startSend("192.168.0.190", 11111, true, 3, 1);
+         mVideoEngine.startSend(mDestip, 11111, true, 3, 1);
          startCall();
   	}
 
@@ -165,7 +163,11 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
 
   private void startCall() {
     //getEngine().startVideoSend();
-    mVideoCapture.startCapture(640, 480, 2000, 35000);
+	int position = SysConfig.getSaveResolution(this);
+	int width = VideoEngine.RESOLUTIONS[position][0];
+	int height = VideoEngine.RESOLUTIONS[position][1];
+    mVideoCapture.startCapture(width, height, 2000, 35000);
+    Log.w(TAG,"startCall "+"width:"+width+" height:"+height);
     setViews();
   }
   
