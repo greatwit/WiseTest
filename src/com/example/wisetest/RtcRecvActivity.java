@@ -11,7 +11,6 @@
 package com.example.wisetest;
 
 import org.webrtc.videoengine.ViERenderer;
-import org.webrtc.videoengine.VideoCaptureDeviceInfoAndroid;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.VideoEngine;
 
@@ -72,7 +71,7 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
         }
       });
     
-    Log.i(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
+    //Log.i(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
   }
   
 

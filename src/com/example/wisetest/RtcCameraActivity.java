@@ -3,6 +3,7 @@ package com.example.wisetest;
 
 import org.webrtc.videoengine.VideoCaptureShow;
 import org.webrtc.webrtcdemo.VideoEngine;
+import org.webrtc.webrtcdemo.VoiceEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
 
@@ -35,6 +36,7 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
   
   //static public MediaEngine mediaEngine = null;
   static public VideoEngine mVideoEngine;
+  static public VoiceEngine mVoiceEngine;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +68,13 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
     mediaEngine.setNack(true);
     */
     
+    //Log.e(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
+    
     mVideoEngine = new VideoEngine(this);
     mVideoEngine.initEngine();
+    
+    mVoiceEngine = new VoiceEngine(this);
+    mVoiceEngine.initEngine();
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     
@@ -130,12 +137,17 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
   	{
          mVideoEngine.stopSend();
          stopAll();
+         
+         mVoiceEngine.stopVoice();
   	}else
   	{
          mVideoEngine.startSend(mDestip, 11111, true, 3, 1);
          startCall();
+         
+         int temp = SysConfig.getSavePlay(this);
+       	 if((temp&0x4) != 0)
+       		 mVoiceEngine.startVoice(mDestip, 11113, 11113);
   	}
-
     btStartStopCall.setBackgroundResource(mVideoEngine.isSendRunning() ? R.drawable.record_stop : R.drawable.record_start);
   }
   
@@ -179,10 +191,14 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
 	        stopAll();
 	    }
 	    mVideoEngine.deInitEngine();
+	    
+	    if(mVoiceEngine.isVoiceRunning())
+	    {
+	    	mVoiceEngine.stopVoice();
+	    }
+	    mVoiceEngine.deInitEngine();
 	    super.onDestroy();
   }
-
-
   
 }
 

@@ -107,22 +107,29 @@ public class VideoEngine {
   {
 	  if(mSendRunning == false)
 	  {
+		  Log.e(TAG,"setSendDestination");
 	      check(setSendDestination(videoChannel, videoTxPort, remoteIp) == 0,
 	              "Failed setSendDestination");
 	      
+	      Log.e(TAG,"getVideoCodec");
 	      VideoCodecInst codec = getVideoCodec(0, resolutionIndex);
+	      Log.e(TAG,"setSendCodec");
 	      check(setSendCodec(videoChannel, codec) == 0, "Failed setReceiveCodec");
 	      codec.dispose();
-	      
+	      Log.e(TAG,"setNackStatus");
 	      check(setNackStatus(videoChannel, nack) == 0,
 	    	        "Failed setNackStatus");
 	      int id = getCameraId(cameraid);
-	      currentCameraHandle = allocateCaptureDevice(id);
 	      
+	      Log.e(TAG,"allocateCaptureDevice");
+	      currentCameraHandle = CreateCaptureDevice(id);
+	      Log.e(TAG,"connectCaptureDevice id:"+id);
 	      check(connectCaptureDevice(currentCameraHandle, videoChannel) == 0,
 	          "Failed to connect capture device");
-	      check(startCapture(currentCameraHandle) == 0, "Failed StartCapture");
-	      
+	      Log.e(TAG,"startCapture");
+	      //check(startCapture(currentCameraHandle) == 0, "Failed StartCapture");
+	      gstartCapture(640,480,35,12,6);
+	      Log.e(TAG,"startSend");
 	      check(startSend(videoChannel) == 0, "Failed StartSend");
 	      
 	      mSendRunning = true;
@@ -254,8 +261,11 @@ public class VideoEngine {
   private native int deRegisterExternalReceiveCodec(int channel, int plType);
   private native int startRender(int channel);
   private native int numberOfCaptureDevices();
+  private native int CreateCaptureDevice(int index);
   private native int allocateCaptureDevice(int index/*CameraDesc camera*/);
   private native int connectCaptureDevice(int cameraId, int channel);
+  
+  private native int gstartCapture(int width, int height, int maxFPS, int rawType, int codecType);
   private native int startCapture(int cameraId);
   private native int stopCapture(int cameraId);
   private native int provideCameraBuffer(int cameraId, byte[] javaCameraFrame, int length);

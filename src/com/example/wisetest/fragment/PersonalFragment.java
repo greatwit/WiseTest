@@ -72,9 +72,9 @@ public class PersonalFragment extends Fragment
 	          CheckBox cbVideoReceive = (CheckBox) checkBox;
 	          int temp = SysConfig.getSavePlay(mContext);
 	          if(cbVideoReceive.isChecked()==true)
-	        	  temp|=0x1;
+	        	  temp|=0x1; //0001
 	          else
-	        	  temp&=0x6;
+	        	  temp&=0x6; //0110
 	          SysConfig.setSavePlay(mContext, temp);
 	        }
 	      });
@@ -86,9 +86,9 @@ public class PersonalFragment extends Fragment
 	          CheckBox cbVideoSend = (CheckBox) checkBox;
 	          int temp = SysConfig.getSavePlay(mContext);
 	          if(cbVideoSend.isChecked()==true)
-	        	  temp|=0x2;
+	        	  temp|=0x2;//0010
 	          else
-	        	  temp&=0x5;
+	        	  temp&=0x5;//0101
 	          SysConfig.setSavePlay(mContext, temp);
 	        }
 	      });
@@ -100,9 +100,9 @@ public class PersonalFragment extends Fragment
 	          CheckBox cbAudio = (CheckBox) checkBox;
 	          int temp = SysConfig.getSavePlay(mContext);
 	          if(cbAudio.isChecked()==true)
-	        	  temp|=0x4;
+	        	  temp|=0x4;//0100
 	          else
-	        	  temp&=0x3;
+	        	  temp&=0x3;//0011
 	          SysConfig.setSavePlay(mContext, temp);
 	        }
 	      });
