@@ -90,7 +90,8 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
   // API needs a synchronous success return value we wait for the result.
   public synchronized boolean startCapture(
       final int width, final int height,
-      final int min_mfps, final int max_mfps) {
+      final int min_mfps, final int max_mfps) 
+  {
     Log.d(TAG, "startCapture: " + width + "x" + height + "@" +
         min_mfps + ":" + max_mfps);
     if (cameraThread != null || cameraThreadHandler != null) {
@@ -117,7 +118,7 @@ public class VideoCaptureShow implements PreviewCallback, Callback {
       Exchanger<Boolean> result) {
     Throwable error = null;
     try {
-      camera = Camera.open(1); //id
+      camera = Camera.open(0); //id
 
       if (localPreview != null) {
         localPreview.addCallback(this);

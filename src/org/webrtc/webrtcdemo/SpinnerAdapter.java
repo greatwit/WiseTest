@@ -10,8 +10,6 @@
 
 package org.webrtc.webrtcdemo;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.wisetest.R;
 
