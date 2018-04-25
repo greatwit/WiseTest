@@ -9,6 +9,8 @@ import com.example.wisetest.recorder.util.SysConfig;
 
 
 import android.app.Activity;
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +23,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class RtcCameraActivity extends Activity// implements MediaEngineObserver
+@SuppressWarnings("deprecation")
+public class RtcCameraActivity extends Activity implements PreviewCallback
 {
   private String  TAG = getClass().getSimpleName();
 
@@ -34,7 +37,6 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
   private VideoCaptureShow mVideoCapture;
   private String mDestip;
   
-  //static public MediaEngine mediaEngine = null;
   static public VideoEngine mVideoEngine;
   static public VoiceEngine mVoiceEngine;
   
@@ -54,21 +56,6 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
     setContentView(R.layout.activity_webrtc);
     llLocalSurface  = (LinearLayout) findViewById(R.id.llRemoteView);
 
-/*
-    // Load all settings dictated in xml.
-    mediaEngine = new MediaEngine(this);
-    mediaEngine.setRemoteIp(destip);//127.0.0.1 192.168.250.208
-    mediaEngine.setTrace(true);
-
-    mediaEngine.setSendVideo(true);
-    mediaEngine.setVideoCodec(0);
-    // TODO(hellner): resolutions should probably be in the xml as well.
-    mediaEngine.setResolutionIndex(MediaEngine.numberOfResolutions() - 3);
-    mediaEngine.setVideoTxPort(11111);
-    mediaEngine.setNack(true);
-    */
-    
-    //Log.e(TAG, VideoCaptureDeviceInfoAndroid.getDeviceInfo());
     
     mVideoEngine = new VideoEngine(this);
     mVideoEngine.initEngine();
@@ -79,16 +66,8 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
     tvStats = (TextView) findViewById(R.id.tvStats);
     
     Button btSwitchCamera = (Button) findViewById(R.id.btSwitchCamera);
-//    if (getEngine().hasMultipleCameras()) {
-//      btSwitchCamera.setOnClickListener(new View.OnClickListener() {
-//        public void onClick(View button) {
-//          toggleCamera((Button) button);
-//        }
-//        });
-//    } else {
+
       btSwitchCamera.setEnabled(false);
-    //}
-    //btSwitchCamera.setText(getEngine().frontCameraIsSet() ? R.string.backCamera : R.string.frontCamera);
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
     //btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);
@@ -98,15 +77,11 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
         }
       });
     
-    //getEngine().setResolutionIndex(SysConfig.getSaveResolution(this));
     Log.w(TAG, "spCodecSize.setSelection:"+ SysConfig.getSaveResolution(this) );
 
-    //getEngine().setObserver(this);
     
     mVideoCapture = new VideoCaptureShow(this);
   }
-  
-  //private MediaEngine getEngine() { return mediaEngine; }
 
   private void setViews() {
     SurfaceView svLocal = mVideoCapture.getLocalSurfaceView();
@@ -141,7 +116,8 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
          mVoiceEngine.stopVoice();
   	}else
   	{
-         mVideoEngine.startSend(mDestip, 11111, true, 3, 1);
+  		 int resolutionIndex = SysConfig.getSaveResolution(this);
+         mVideoEngine.startSend(mDestip, 11111, true, resolutionIndex, 1);
          startCall();
          
          int temp = SysConfig.getSavePlay(this);
@@ -162,9 +138,6 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
       svLocal = mVideoCapture.getLocalSurfaceView();
       llLocalSurface.addView(svLocal);
     }
-//    btSwitchCamera.setText(getEngine().frontCameraIsSet() ?
-//        R.string.backCamera :
-//        R.string.frontCamera);
   }
 
   public void stopAll() {
@@ -178,7 +151,7 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
 	int position = SysConfig.getSaveResolution(this);
 	int width = VideoEngine.RESOLUTIONS[position][0];
 	int height = VideoEngine.RESOLUTIONS[position][1];
-    mVideoCapture.startCapture(width, height, 2000, 35000);
+    mVideoCapture.startCapture(this, width, height, 2000, 35000);
     Log.w(TAG,"startCall "+"width:"+width+" height:"+height);
     setViews();
   }
@@ -199,6 +172,13 @@ public class RtcCameraActivity extends Activity// implements MediaEngineObserver
 	    mVoiceEngine.deInitEngine();
 	    super.onDestroy();
   }
+
+@Override
+public void onPreviewFrame(byte[] data, Camera camera) {
+	// TODO Auto-generated method stub
+	mVideoEngine.provideCameraBuffer(data, data.length);
+	Log.w(TAG, "Provide:"+data.length);
+}
   
 }
 

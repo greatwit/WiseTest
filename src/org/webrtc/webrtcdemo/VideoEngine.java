@@ -126,9 +126,14 @@ public class VideoEngine {
 	      Log.e(TAG,"connectCaptureDevice id:"+id);
 	      check(connectCaptureDevice(currentCameraHandle, videoChannel) == 0,
 	          "Failed to connect capture device");
-	      Log.e(TAG,"startCapture");
+	      
 	      //check(startCapture(currentCameraHandle) == 0, "Failed StartCapture");
-	      gstartCapture(640,480,35,12,6);
+	      
+	      int w = RESOLUTIONS[resolutionIndex][0];
+	      int h = RESOLUTIONS[resolutionIndex][1];
+	      Log.w(TAG,"startCapture w:" + w + " h:"+h);
+	      
+	      gstartCapture(w,h,35,12,6);
 	      Log.e(TAG,"startSend");
 	      check(startSend(videoChannel) == 0, "Failed StartSend");
 	      
