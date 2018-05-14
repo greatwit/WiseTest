@@ -12,7 +12,7 @@
         android:id="@+id/btnEncode"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Encode Demo">
+        android:text="Recv Demo">
     </Button>
     
     <Button
@@ -20,7 +20,7 @@
         android:layout_below="@id/btnEncode"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Decode demo">
+        android:text="Send demo">
     </Button>
 
     <Button

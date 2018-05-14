@@ -13,13 +13,13 @@ package com.example.wisetest;
 import org.webrtc.videoengine.ViERenderer;
 import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.VideoEngine;
+import org.webrtc.webrtcdemo.VoiceEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
 
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
@@ -28,9 +28,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class RtcRecvActivity extends Activity  implements MediaEngineObserver
+public class CameraRecvActivity extends Activity implements MediaEngineObserver
 {
-  private String  TAG = "RtcRecvActivity";
+  private String  TAG = getClass().getSimpleName();
 
   private ImageButton btStartStopCall;
   private TextView tvStats;
@@ -40,7 +40,10 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
   SurfaceView remoteSurfaceView;
   
   
-  static public VideoEngine mVideoEngine;
+  static private VideoEngine mVideoEngine;
+  static private VoiceEngine mVoiceEngine;
+  
+  private String mDestip;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +52,6 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
     requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    
-    String destip = SysConfig.getSaveAddr(this);
-    
-	Log.w(TAG, "get destip:" + destip );
 	
     setContentView(R.layout.activity_webrtc);
     llRemoteSurface = (LinearLayout) findViewById(R.id.llRemoteView);
@@ -60,8 +59,13 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
     tvStats = (TextView) findViewById(R.id.tvStats);
     setViews();
     
+    mDestip = SysConfig.getSaveAddr(this);
+    
     mVideoEngine = new VideoEngine(this);
     mVideoEngine.initEngine();
+    
+    mVoiceEngine = new VoiceEngine(this);
+    mVoiceEngine.initEngine();
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
     btStartStopCall.setBackgroundResource(mVideoEngine.isRecvRunning() ? R.drawable.record_stop : R.drawable.record_start);
@@ -79,6 +83,7 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
     remoteSurfaceView = ViERenderer.CreateRenderer(this, true);
     if (remoteSurfaceView != null) {
       llRemoteSurface.addView(remoteSurfaceView);
+      //llRemoteSurface.setRotation(90);
     }
   }
 
@@ -101,16 +106,21 @@ public class RtcRecvActivity extends Activity  implements MediaEngineObserver
   public void toggleStart() {
     if (mVideoEngine.isRecvRunning()) {
     	mVideoEngine.stopRecv();
+    	
+    	mVoiceEngine.stopVoice();
     } else {
     	mVideoEngine.startRecv(remoteSurfaceView, 11111, true, SysConfig.getSaveResolution(this));
+        
+    	int temp = SysConfig.getSavePlay(this);
+      	 if((temp&0x4) != 0)
+      		 mVoiceEngine.startVoice(mDestip, 11113, 11113);
     }
     btStartStopCall.setBackgroundResource(mVideoEngine.isRecvRunning() ? R.drawable.record_stop : R.drawable.record_start);
   }
 
   
   @Override
-  public void onDestroy() 
-  {
+  public void onDestroy() {
 	    if (mVideoEngine.isRecvRunning()){
 	    	mVideoEngine.stopRecv();
 	    }

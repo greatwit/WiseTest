@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 @SuppressWarnings("deprecation")
-public class RtcCameraActivity extends Activity implements PreviewCallback
+public class CameraSendActivity extends Activity implements PreviewCallback
 {
   private String  TAG = getClass().getSimpleName();
 
@@ -37,8 +37,8 @@ public class RtcCameraActivity extends Activity implements PreviewCallback
   private VideoCaptureShow mVideoCapture;
   private String mDestip;
   
-  static public VideoEngine mVideoEngine;
-  static public VoiceEngine mVoiceEngine;
+  static private VideoEngine mVideoEngine;
+  static private VoiceEngine mVoiceEngine;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +118,7 @@ public class RtcCameraActivity extends Activity implements PreviewCallback
   	{
   		 int resolutionIndex = SysConfig.getSaveResolution(this);
          mVideoEngine.startSend(mDestip, 11111, true, resolutionIndex, 1);
+         mVideoEngine.setCaptureRotate(90);
          startCall();
          
          int temp = SysConfig.getSavePlay(this);

@@ -1,14 +1,14 @@
 package com.example.wisetest.fragment;
 
 
-import com.example.wisetest.RtcCameraActivity;
+import com.example.wisetest.CameraSendActivity;
 import com.example.wisetest.ExtractorActivity;
 import com.example.wisetest.MediaPlayerActivity;
 import com.example.wisetest.R;
 import com.example.wisetest.RecNativeActivity;
 import com.example.wisetest.RecUpperActivity;
 import com.example.wisetest.VideoViewActivity;
-import com.example.wisetest.RtcRecvActivity;
+import com.example.wisetest.CameraRecvActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -78,11 +78,11 @@ public class HomeFragment extends Fragment
 		switch(v.getId())
 		{
 			case R.id.btnEncode:
-				intent.setClass(mContext, RtcRecvActivity.class);
+				intent.setClass(mContext, CameraRecvActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.btnDecode:
-				intent.setClass(mContext, RtcCameraActivity.class);
+				intent.setClass(mContext, CameraSendActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.btnUpperRec:
