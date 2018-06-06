@@ -1,7 +1,12 @@
 package com.example.wisetest;
 
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import com.example.wisetest.fragment.CommonTabLayout;
 import com.example.wisetest.fragment.CustomTabEntity;
@@ -16,11 +21,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.widget.TextView;
 
 
 public class MainActivity extends FragmentActivity {
 
     private CommonTabLayout tabLayout;
+    private TextView main_title_bar_text;
     private OnTabSelectListener mTabSelectListener;
     private int currentTabPosition = 0;// 当前Tab选中的位置
 	private HomeFragment homeFragment;
@@ -60,6 +68,7 @@ public class MainActivity extends FragmentActivity {
 		tabLayout = (CommonTabLayout) findViewById(R.id.tab_layout);
 		// 点击监听
 		tabLayout.setOnTabSelectListener(mTabSelectListener);
+		main_title_bar_text = (TextView)findViewById(R.id.main_title_bar_text);
     }
     
 	/** 初始化碎片 */
@@ -97,6 +106,7 @@ public class MainActivity extends FragmentActivity {
 			transaction.commitAllowingStateLoss();
 			//ChangeTitleLayout(position);
 			currentTabPosition = 0;
+			main_title_bar_text.setText("WiseTest");
 			// 重新获得已绑房产列表
 			new Handler().post(new Runnable() {
 				@Override
@@ -113,6 +123,7 @@ public class MainActivity extends FragmentActivity {
 			transaction.commitAllowingStateLoss();
 			//ChangeTitleLayout(position);
 			currentTabPosition = 1;
+			main_title_bar_text.setText("WiseTest");
 			break;
 
 		case 2:
@@ -123,10 +134,44 @@ public class MainActivity extends FragmentActivity {
 			transaction.commitAllowingStateLoss();
 			//ChangeTitleLayout(position);
 			currentTabPosition = 2;
+			main_title_bar_text.setText("Local:"+getHostIP());
 			break;
 		default:
 			break;
 		}
+	}
+	
+	/** 
+	 * 获取ip地址 
+	 * @return 
+	 */  
+	public static String getHostIP() {  
+	  
+	    String hostIp = null;  
+	    try {  
+	        Enumeration nis = NetworkInterface.getNetworkInterfaces();  
+	        InetAddress ia = null;  
+	        while (nis.hasMoreElements()) {  
+	            NetworkInterface ni = (NetworkInterface) nis.nextElement();  
+	            Enumeration<InetAddress> ias = ni.getInetAddresses();  
+	            while (ias.hasMoreElements()) {  
+	                ia = ias.nextElement();  
+	                if (ia instanceof Inet6Address) {  
+	                    continue;// skip ipv6  
+	                }  
+	                String ip = ia.getHostAddress();  
+	                if (!"127.0.0.1".equals(ip)) {  
+	                    hostIp = ia.getHostAddress();  
+	                    break;  
+	                }  
+	            }  
+	        }  
+	    } catch (SocketException e) {  
+	        Log.i("yao", "SocketException");  
+	        e.printStackTrace();  
+	    }  
+	    return hostIp;  
+	  
 	}
 	
 	@Override

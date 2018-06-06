@@ -66,8 +66,7 @@ public class CameraSendActivity extends Activity implements PreviewCallback
     tvStats = (TextView) findViewById(R.id.tvStats);
     
     Button btSwitchCamera = (Button) findViewById(R.id.btSwitchCamera);
-
-      btSwitchCamera.setEnabled(false);
+    	    btSwitchCamera.setEnabled(false);
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
     //btStartStopCall.setBackgroundResource(getEngine().isRunning() ? R.drawable.record_stop : R.drawable.record_start);

@@ -69,8 +69,10 @@ public class VideoEngine {
   // Keep in sync (including this comment) with
   // webrtc/video_engine/include/vie_rtp_rtcp.h:ViEKeyFrameRequestMethod
   public enum VieKeyFrameRequestMethod {
-    KEY_FRAME_REQUEST_NONE, KEY_FRAME_REQUEST_PLI_RTCP,
-    KEY_FRAME_REQUEST_FIR_RTP, KEY_FRAME_REQUEST_FIR_RTCP
+    KEY_FRAME_REQUEST_NONE, 
+    KEY_FRAME_REQUEST_PLI_RTCP,
+    KEY_FRAME_REQUEST_FIR_RTP, 
+    KEY_FRAME_REQUEST_FIR_RTCP
   }
 
   // Keep in sync (including this comment) with
@@ -116,6 +118,7 @@ public class VideoEngine {
 	      Log.e(TAG,"setSendCodec");
 	      check(setSendCodec(videoChannel, codec) == 0, "Failed setReceiveCodec");
 	      codec.dispose();
+	      
 	      Log.e(TAG,"setNackStatus");
 	      check(setNackStatus(videoChannel, nack) == 0,
 	    	        "Failed setNackStatus");
