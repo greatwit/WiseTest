@@ -1,12 +1,11 @@
 
 package com.example.wisetest;
 
-import org.webrtc.videoengine.VideoCaptureShow;
 import org.webrtc.webrtcdemo.VideoEngine;
 import org.webrtc.webrtcdemo.VoiceEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
-
+import com.example.wisetest.views.VideoCaptureShow;
 
 import android.app.Activity;
 import android.hardware.Camera;
@@ -62,6 +61,7 @@ public class CameraSendActivity extends Activity implements PreviewCallback
     
     mVoiceEngine = new VoiceEngine(this);
     mVoiceEngine.initEngine();
+    mVoiceEngine.setSpeaker(true);
     
     tvStats = (TextView) findViewById(R.id.tvStats);
     

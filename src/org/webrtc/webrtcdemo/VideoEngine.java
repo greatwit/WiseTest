@@ -250,11 +250,17 @@ public class VideoEngine {
   private native int init();
   private native int setVoiceEngine(VoiceEngine voe);
   private native void dispose();
-  private native int startSend(int channel);
+  
+  private native int gstartCapture(int width, int height, int maxFPS, int rawType, int codecType);
+  private native int startCapture(int cameraId);
+  private native int stopCapture(int cameraId);
+  private native int startRender(int channel);
   private native int stopRender(int channel);
+  private native int startSend(int channel);
   private native int stopSend(int channel);
   private native int startReceive(int channel);
   private native int stopReceive(int channel);
+  
   private native int createChannel();
   private native int deleteChannel(int channel);
   private native int connectAudioChannel(int videoChannel, int voiceChannel);
@@ -271,15 +277,12 @@ public class VideoEngine {
   private native int registerExternalReceiveCodec(int channel, int plType,
       MediaCodecVideoDecoder decoder, boolean internal_source);
   private native int deRegisterExternalReceiveCodec(int channel, int plType);
-  private native int startRender(int channel);
+  
   private native int numberOfCaptureDevices();
   private native int CreateCaptureDevice(int index);
   private native int allocateCaptureDevice(int index/*CameraDesc camera*/);
   private native int connectCaptureDevice(int cameraId, int channel);
   
-  private native int gstartCapture(int width, int height, int maxFPS, int rawType, int codecType);
-  private native int startCapture(int cameraId);
-  private native int stopCapture(int cameraId);
   private native int provideCameraBuffer(int cameraId, byte[] javaCameraFrame, int length);
   private native int releaseCaptureDevice(int cameraId);
   private native int setRotateCapturedFrames(int cameraId, int degrees);
@@ -290,6 +293,7 @@ public class VideoEngine {
   }
   private native int setKeyFrameRequestMethod(int channel,
       int requestMethod);
+  
   private native RtcpStatistics getReceivedRtcpStatistics(int channel);
   private native int registerObserver(int channel,
       VideoDecodeEncodeObserver callback);

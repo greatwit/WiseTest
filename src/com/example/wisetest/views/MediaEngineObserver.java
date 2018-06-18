@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.webrtc.webrtcdemo;
+package com.example.wisetest.views;
 
 public interface MediaEngineObserver {
   void newStats(String stats);

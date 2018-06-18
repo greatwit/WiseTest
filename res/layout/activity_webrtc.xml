@@ -41,7 +41,7 @@
 	              android:textSize="12sp"
 	              android:textColor="@color/red"
 	              android:layout_centerHorizontal="true"
-	              android:text=""/>
+	              android:text="abc"/>
 	    
 	    <Button android:id="@+id/btSwitchCamera"
 	            android:layout_width="60dip"

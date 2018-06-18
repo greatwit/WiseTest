@@ -1,10 +1,10 @@
 package com.example.wisetest.fragment;
 
-import org.webrtc.webrtcdemo.SpinnerAdapter;
 import org.webrtc.webrtcdemo.VideoEngine;
 
 import com.example.wisetest.R;
 import com.example.wisetest.recorder.util.SysConfig;
+import com.example.wisetest.views.SpinnerAdapter;
 
 import android.content.Context;
 import android.os.Bundle;

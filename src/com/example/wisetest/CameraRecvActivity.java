@@ -11,12 +11,11 @@
 package com.example.wisetest;
 
 import org.webrtc.videoengine.ViERenderer;
-import org.webrtc.webrtcdemo.MediaEngineObserver;
 import org.webrtc.webrtcdemo.VideoEngine;
 import org.webrtc.webrtcdemo.VoiceEngine;
 
 import com.example.wisetest.recorder.util.SysConfig;
-
+import com.example.wisetest.views.MediaEngineObserver;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -66,6 +65,7 @@ public class CameraRecvActivity extends Activity implements MediaEngineObserver
     
     mVoiceEngine = new VoiceEngine(this);
     mVoiceEngine.initEngine();
+    mVoiceEngine.setSpeaker(true);
 
     btStartStopCall = (ImageButton) findViewById(R.id.btStartStopCall);
     btStartStopCall.setBackgroundResource(mVideoEngine.isRecvRunning() ? R.drawable.record_stop : R.drawable.record_start);
@@ -95,12 +95,13 @@ public class CameraRecvActivity extends Activity implements MediaEngineObserver
 	  }
   
   // tvStats need to be updated on the UI thread.
+  @Override
   public void newStats(final String stats) {
-    	runOnUiThread(new Runnable() {
-        public void run() {
-          tvStats.setText(stats);
-        }
-      });
+  	runOnUiThread(new Runnable() {
+      public void run() {
+        tvStats.setText(stats);
+      }
+    });
   }
 
   public void toggleStart() {
@@ -127,6 +128,12 @@ public class CameraRecvActivity extends Activity implements MediaEngineObserver
 	    removeViews();
 	    remoteSurfaceView = null;
 	    mVideoEngine.deInitEngine();
+	    
+	    if(mVoiceEngine.isVoiceRunning()) {
+	    	mVoiceEngine.stopVoice();
+	    }
+	    mVoiceEngine.deInitEngine();
+	    
 	    super.onDestroy();
   }
   
