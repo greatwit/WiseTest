@@ -32,7 +32,7 @@ import java.util.Calendar;
 
 @SuppressLint("NewApi")
 @SuppressWarnings("deprecation")
-public class RecUpperActivity extends Activity implements 
+public class UpperMediaRecorderActivity extends Activity implements 
 			OnClickListener, SurfaceHolder.Callback, Runnable
 {
     private static final String TAG = "MainActivity";
@@ -190,7 +190,7 @@ public class RecUpperActivity extends Activity implements
         mMediaRecorder.setCamera(mCamera);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));//QUALITY_480P QUALITY_720P QUALITY_1080P
+        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));//QUALITY_480P QUALITY_720P QUALITY_1080P
         mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
         mMediaRecorder.setVideoFrameRate(15);
         

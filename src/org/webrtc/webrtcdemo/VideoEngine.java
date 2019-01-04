@@ -274,9 +274,9 @@ public class VideoEngine {
       float left, float top,
       float right, float bottom);
   private native int removeRenderer(int channel);
-  private native int registerExternalReceiveCodec(int channel, int plType,
-      MediaCodecVideoDecoder decoder, boolean internal_source);
-  private native int deRegisterExternalReceiveCodec(int channel, int plType);
+//  private native int registerExternalReceiveCodec(int channel, int plType,
+//      MediaCodecVideoDecoder decoder, boolean internal_source);
+//  private native int deRegisterExternalReceiveCodec(int channel, int plType);
   
   private native int numberOfCaptureDevices();
   private native int CreateCaptureDevice(int index);
@@ -304,15 +304,18 @@ public class VideoEngine {
     return nativeSetTraceFilter(filter.level);
   }
   private native int nativeSetTraceFilter(int filter);
+  
+  
+  
   private int startRtpDump(int channel, String file,
       RtpDirections direction) {
     return startRtpDump(channel, file, direction.ordinal());
   }
-  private native int startRtpDump(int channel, String file,
-      int direction);
   private int stopRtpDump(int channel, RtpDirections direction) {
     return stopRtpDump(channel, direction.ordinal());
   }
+  private native int startRtpDump(int channel, String file,
+	      int direction);
   private native int stopRtpDump(int channel, int direction);
   //public native int setLocalSSRC(int channel, int ssrc);
 }

@@ -10,7 +10,6 @@ import android.media.CamcorderProfile;
 
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -25,16 +24,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
-import com.wise.mediarec.Recorder.WiseRecorder;
+import com.wise.mediarec.Recorder.CamCodec;
 
 
 
-@SuppressLint("NewApi")
+@SuppressLint({ "NewApi", "ShowToast" })
 @SuppressWarnings("deprecation")
-public class RecNativeActivity extends Activity implements 
+public class CamCodecActivity extends Activity implements 
 			OnClickListener, SurfaceHolder.Callback, Runnable
 {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "CamCodecActivity";
     
     private ImageButton mBtnStartStop;
     private Chronometer mTimer;
@@ -43,8 +42,8 @@ public class RecNativeActivity extends Activity implements
     private SurfaceHolder mHolder;
 	private Camera mCamera;
 	private Camera.Parameters mParameters;
-    private WiseRecorder mMediaRecorder = null;
 
+	private CamCodec mCamCodec = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,102 +86,109 @@ public class RecNativeActivity extends Activity implements
 			case R.id.ib_record:
             Log.d(TAG,"录像");
             
-            if (mMediaRecorder!=null) 
-            {
-                stopRecording();
-                mTimer.stop();
+            if(mCamCodec==null) {
+            	mCamCodec = new CamCodec();
+                mCamera.unlock();
+                mCamCodec.StartCamCodec(mCamera);
+                
+                mBtnStartStop.setBackgroundResource(R.drawable.record_stop);
+                Log.w(TAG,"开始录像");
+            }else {
+            	mCamCodec.StopCamCodec();
+            	mCamCodec = null;
                 mBtnStartStop.setBackgroundResource(R.drawable.record_start);
                 Log.w(TAG,"停止录像");
-            } else {
-                if (startRecording()) 
-                {
-                    mTimer.setBase(SystemClock.elapsedRealtime());
-                    mTimer.start();
-                    mBtnStartStop.setBackgroundResource(R.drawable.record_stop);
-                    Log.w(TAG,"开始录像");
-                }
-            }
+			}
+
+            
+//            if (mMediaRecorder!=null) 
+//            {
+//                stopRecording();
+//                mTimer.stop();
+//                mBtnStartStop.setBackgroundResource(R.drawable.record_start);
+//                Log.w(TAG,"停止录像");
+//            } else {
+//                if (startRecording()) 
+//                {
+//                    mTimer.setBase(SystemClock.elapsedRealtime());
+//                    mTimer.start();
+//                    mBtnStartStop.setBackgroundResource(R.drawable.record_stop);
+//                    Log.w(TAG,"开始录像");
+//                }
+//            }
 			break;
 		}
 	}
 
     public boolean startRecording() 
     {
-        if (prepareMediaRecorder()) 
-        {
-            new Thread(this).start();
-            return true;
-        } else {
-            releaseMediaRecorder();
-        }
+//        if (prepareMediaRecorder()) 
+//        {
+//            new Thread(this).start();
+//            return true;
+//        } else {
+//            releaseMediaRecorder();
+//        }
         return false;
-    }
-
-    public void stopRecording() 
-    {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.stop();
-        }
-        releaseMediaRecorder();
-    }
-    
-	private void releaseMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.reset();
-            mMediaRecorder.release();
-            mMediaRecorder = null;
-        }
     }
     
     @SuppressLint("NewApi")
 	private boolean prepareMediaRecorder() 
     {
     	//InitLocalSocket();
-        mMediaRecorder = new WiseRecorder(); 
-        mCamera.unlock();
-        mMediaRecorder.reset();
-        mMediaRecorder.setCamera(mCamera);
-        //mMediaRecorder.setAudioSource(WiseRecorder.AudioSource.CAMCORDER);
-        mMediaRecorder.setVideoSource(WiseRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));//QUALITY_480P QUALITY_720P QUALITY_1080P
-        mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
-        //mMediaRecorder.setVideoFrameRate(10);
-        
-        String path = getSDPath();
-        if (path != null) 
-        {
-            File dir = new File(path + "/RecorderTest");
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-            path = path + "/RecorderTest/" + "rectest.mp4";
-        }
-        else
-        	path = "/sdcard/"+getDate() + ".mp4";
-        
-        mMediaRecorder.setOutputFile(path);//sender.getFileDescriptor()  
-        try {
-            mMediaRecorder.prepare();
-        } catch (IOException e) {
-            releaseMediaRecorder();
-            e.printStackTrace();
-        }
+//        mMediaRecorder = new WiseRecorder(); 
+//        mCamera.unlock();
+//        mMediaRecorder.reset();
+//        mMediaRecorder.setCamera(mCamera);
+//        
+//        mMediaRecorder.setAudioSource(WiseRecorder.AudioSource.CAMCORDER);
+//        mMediaRecorder.setVideoSource(WiseRecorder.VideoSource.CAMERA);
+//        
+//        mMediaRecorder.setOutputFormat(WiseRecorder.OutputFormat.MPEG_4);
+////        // 设置录制的视频编码和音频编码
+////        mMediaRecorder.setVideoEncoder(WiseRecorder6.VideoEncoder.H264);
+////        mMediaRecorder.setAudioEncoder(WiseRecorder6.AudioEncoder.AAC);
+//
+//        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));//QUALITY_480P QUALITY_720P QUALITY_1080P
+//        //mMediaRecorder.setVideoSize(1280, 720);
+//        mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
+//        mMediaRecorder.setVideoFrameRate(15);
+//        
+//        String path = getSDPath();
+//        if (path != null) 
+//        {
+//            File dir = new File(path + "/RecorderTest");
+//            if (!dir.exists()) {
+//                dir.mkdir();
+//            }
+//            path = path + "/RecorderTest/" + "natrec.mp4";
+//        }
+//        else
+//        	path = "/sdcard/"+getDate() + ".mp4";
+//        Toast.makeText(this, path, Toast.LENGTH_LONG).show();
+//        mMediaRecorder.setOutputFile(path);//sender.getFileDescriptor()  
+//        try {
+//            mMediaRecorder.prepare();
+//        } catch (IOException e) {
+//            releaseMediaRecorder();
+//            e.printStackTrace();
+//        }
         return true;
     }
 
 	public void run() 
 	{
-        try {
-            mMediaRecorder.start();
-        } catch (IllegalStateException e) {
-        	Log.e(TAG, "MediaRecorder error:" + e);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            Log.e(TAG, "MediaRecorder error:" + e);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "MediaRecorder error:" + e);
-        }
+//        try {
+//            mMediaRecorder.start();
+//        } catch (IllegalStateException e) {
+//        	Log.e(TAG, "MediaRecorder error:" + e);
+//        } catch (RuntimeException e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "MediaRecorder error:" + e);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "MediaRecorder error:" + e);
+//        }
 	}
 	
     @Override
@@ -228,6 +234,7 @@ public class RecNativeActivity extends Activity implements
     	mCamera		= Camera.open();
         mParameters	= mCamera.getParameters();
         mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);//连续对焦 
+        mParameters.setPreviewSize(320, 240);
         mCamera.setParameters(mParameters);
         mCamera.autoFocus(new Camera.AutoFocusCallback() {
             @Override
@@ -247,7 +254,7 @@ public class RecNativeActivity extends Activity implements
                 public void onPreviewFrame(byte[] data, Camera camera) {
                     //Log.i(TAG, "获取预览帧...");
                     //new ProcessFrameAsyncTask().execute(data);
-                    //Log.w(TAG,"预览帧大小："+String.valueOf(data.length));
+                    //Log.i(TAG,"预览帧大小："+String.valueOf(data.length));//320*240 YUV:115200
                 }
             });
         } catch (IOException e) {

@@ -16,9 +16,12 @@
 
 package com.wise.mediarec.Recorder;
 
-
+//import android.annotation.NonNull;
+//import android.annotation.SystemApi;
+//import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
+import android.media.MediaCodec;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -30,6 +33,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
+
 /**
  * Used to record audio and video. The recording control is based on a
  * simple state machine (see below).
@@ -73,24 +77,27 @@ import java.lang.ref.WeakReference;
  * </div>
  */
 @SuppressWarnings("deprecation")
-public class WiseRecorder
+public class WiseRecorder6
 {
-	private static String TAG = WiseRecorder.class.getSimpleName();
+	private static String TAG = WiseRecorder6.class.getSimpleName();
     static {
 		try
 		{
-			System.loadLibrary("wise_rec43");
+			System.loadLibrary("wise_rec6");
+			Log.e(TAG, "load library wise_rec6 successful.");
 		}
 		catch(Throwable e)
 		{ 
-			Log.e(TAG, "load library failed error:"+e.toString());
+			Log.e(TAG, "load library6 failed error:"+e.toString());
 		}
         native_init();
     }
 
     // The two fields below are accessed by native methods
-    private int mNativeContext;
+    @SuppressWarnings("unused")
+    private long mNativeContext;
 
+    @SuppressWarnings("unused")
     private Surface mSurface;
 
     private String mPath;
@@ -102,7 +109,7 @@ public class WiseRecorder
     /**
      * Default constructor.
      */
-    public WiseRecorder() {
+    public WiseRecorder6() {
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -113,10 +120,12 @@ public class WiseRecorder
             mEventHandler = null;
         }
 
+        //String packageName = ActivityThread.currentPackageName();
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<WiseRecorder>(this), "com.example.wisetest");
+        native_setup(new WeakReference<WiseRecorder6>(this), "com.example.wisetest",
+                "com.example.wisetest");//ActivityThread.currentOpPackageName()
     }
 
     /**
@@ -157,9 +166,12 @@ public class WiseRecorder
      * @throws IllegalArgumentException if the surface was not created by
      *           {@link MediaCodec#createPersistentInputSurface}.
      * @see MediaCodec#createPersistentInputSurface
-     * @see WiseRecorder.VideoSource
+     * @see WiseRecorder6.VideoSource
      */
     public void setInputSurface(@NonNull Surface surface) {
+//        if (!(surface instanceof MediaCodec.PersistentSurface)) {
+//            throw new IllegalArgumentException("not a PersistentSurface");
+//        }
         native_setInputSurface(surface);
     }
 
@@ -186,7 +198,7 @@ public class WiseRecorder
      * Defines the audio source.
      * An audio source defines both a default physical source of audio signal, and a recording
      * configuration. These constants are for instance used
-     * in {@link WiseRecorder#setAudioSource(int)} or
+     * in {@link WiseRecorder6#setAudioSource(int)} or
      * {@link AudioRecord.Builder#setAudioSource(int)}.
      */
     public final class AudioSource {
@@ -255,6 +267,7 @@ public class WiseRecorder
          * Audio source for capturing broadcast radio tuner output.
          * @hide
          */
+        //@SystemApi
         public static final int RADIO_TUNER = 1998;
 
         /**
@@ -268,12 +281,13 @@ public class WiseRecorder
          * This is a hidden audio source.
          * @hide
          */
+        //@SystemApi
         public static final int HOTWORD = 1999;
     }
 
     /**
      * Defines the video source. These constants are used with
-     * {@link WiseRecorder#setVideoSource(int)}.
+     * {@link WiseRecorder6#setVideoSource(int)}.
      */
     public final class VideoSource {
       /* Do not change these values without updating their counterparts
@@ -294,7 +308,7 @@ public class WiseRecorder
          * This flag must be used when recording from an
          * {@link android.hardware.camera2} API source.
          * </p><p>
-         * When using this video source type, use {@link WiseRecorder#getSurface()}
+         * When using this video source type, use {@link WiseRecorder6#getSurface()}
          * to retrieve the surface created by MediaRecorder.
          */
         public static final int SURFACE = 2;
@@ -302,7 +316,7 @@ public class WiseRecorder
 
     /**
      * Defines the output format. These constants are used with
-     * {@link WiseRecorder#setOutputFormat(int)}.
+     * {@link WiseRecorder6#setOutputFormat(int)}.
      */
     public final class OutputFormat {
       /* Do not change these values without updating their counterparts
@@ -347,7 +361,7 @@ public class WiseRecorder
 
     /**
      * Defines the audio encoding. These constants are used with
-     * {@link WiseRecorder#setAudioEncoder(int)}.
+     * {@link WiseRecorder6#setAudioEncoder(int)}.
      */
     public final class AudioEncoder {
       /* Do not change these values without updating their counterparts
@@ -371,7 +385,7 @@ public class WiseRecorder
 
     /**
      * Defines the video encoding. These constants are used with
-     * {@link WiseRecorder#setVideoEncoder(int)}.
+     * {@link WiseRecorder6#setVideoEncoder(int)}.
      */
     public final class VideoEncoder {
       /* Do not change these values without updating their counterparts
@@ -859,7 +873,7 @@ public class WiseRecorder
          * </ul>
          * @param extra   an extra code, specific to the error type
          */
-        void onError(WiseRecorder mr, int what, int extra);
+        void onError(WiseRecorder6 mr, int what, int extra);
     }
 
     /**
@@ -976,7 +990,7 @@ public class WiseRecorder
          * </ul>
          * @param extra   an extra code, specific to the error type
          */
-        void onInfo(WiseRecorder mr, int what, int extra);
+        void onInfo(WiseRecorder6 mr, int what, int extra);
     }
 
     /**
@@ -992,9 +1006,9 @@ public class WiseRecorder
 
     private class EventHandler extends Handler
     {
-        private WiseRecorder mMediaRecorder;
+        private WiseRecorder6 mMediaRecorder;
 
-        public EventHandler(WiseRecorder mr, Looper looper) {
+        public EventHandler(WiseRecorder6 mr, Looper looper) {
             super(looper);
             mMediaRecorder = mr;
         }
@@ -1052,7 +1066,7 @@ public class WiseRecorder
     private static void postEventFromNative(Object mediarecorder_ref,
                                             int what, int arg1, int arg2, Object obj)
     {
-        WiseRecorder mr = (WiseRecorder)((WeakReference)mediarecorder_ref).get();
+        WiseRecorder6 mr = (WiseRecorder6)((WeakReference)mediarecorder_ref).get();
         if (mr == null) {
             return;
         }
@@ -1086,7 +1100,7 @@ public class WiseRecorder
     private static native final void native_init();
 
     private native final void native_setup(Object mediarecorder_this,
-            String clientName) throws IllegalStateException;
+            String clientName, String opPackageName) throws IllegalStateException;
 
     private native final void native_finalize();
 

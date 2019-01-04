@@ -25,7 +25,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.Surface;

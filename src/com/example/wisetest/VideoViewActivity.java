@@ -46,7 +46,7 @@ public class VideoViewActivity extends Activity {
         bt_mediaPlayer.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(VideoViewActivity.this, MediaPlayerActivity.class);
+                Intent intent = new Intent(VideoViewActivity.this, UpperMediaPlayerActivity.class);
                 startActivity(intent);
             }
         });

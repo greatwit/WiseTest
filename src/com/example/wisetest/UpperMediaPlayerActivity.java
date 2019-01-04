@@ -4,6 +4,7 @@ import com.wise.mediarec.Recorder.WisePlayer;
 
 import android.app.Activity;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
@@ -15,10 +16,10 @@ import android.widget.Toast;
 
  
 
-public class MediaPlayerActivity extends Activity implements View.OnClickListener {
+public class UpperMediaPlayerActivity extends Activity implements View.OnClickListener {
     private ImageButton btnplay, btnstop, btnpause;
     private SurfaceView surfaceView;
-    private WisePlayer mediaPlayer; 
+    private MediaPlayer mediaPlayer; 
     private int position;
     private String url0 = "/sdcard/RecorderTest/upper.mp4";
     private String url1 = "http://flashmedia.eastday.com/newdate/news/2016-11/shznews1125-19.mp4"; //新闻 640x360
@@ -36,7 +37,7 @@ public class MediaPlayerActivity extends Activity implements View.OnClickListene
         btnplay.setOnClickListener(this);
         btnpause.setOnClickListener(this);
 
-        mediaPlayer = new WisePlayer();
+        mediaPlayer = new MediaPlayer();
         surfaceView = (SurfaceView) this.findViewById(R.id.surfaceView);
 
         // 设置SurfaceView自己不管理的缓冲区

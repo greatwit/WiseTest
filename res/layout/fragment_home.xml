@@ -51,4 +51,11 @@
         android:layout_height="wrap_content"
         android:text="Extractor">
     </Button>
+        <Button
+        android:id="@+id/btnCamCodec"
+        android:layout_below="@id/btnExtractor"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="CamCodec">
+    </Button>
 </RelativeLayout>

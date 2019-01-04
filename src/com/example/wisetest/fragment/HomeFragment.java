@@ -2,12 +2,15 @@ package com.example.wisetest.fragment;
 
 
 import com.example.wisetest.CameraSendActivity;
+import com.example.wisetest.CameraSrcActivity;
 import com.example.wisetest.ExtractorActivity;
-import com.example.wisetest.MediaPlayerActivity;
+import com.example.wisetest.NativeCameraActivity;
+import com.example.wisetest.UpperMediaPlayerActivity;
 import com.example.wisetest.R;
-import com.example.wisetest.RecNativeActivity;
-import com.example.wisetest.RecUpperActivity;
+import com.example.wisetest.NativeMediaRecorderActivity;
+import com.example.wisetest.UpperMediaRecorderActivity;
 import com.example.wisetest.VideoViewActivity;
+import com.example.wisetest.CamCodecActivity;
 import com.example.wisetest.CameraRecvActivity;
 
 import android.content.Context;
@@ -32,7 +35,8 @@ public class HomeFragment extends Fragment
 	private Context mContext;
 	private View view;
 	private Button btnEncode = null, btnDecode = null, btnUpperRec = null, 
-			btnUpperPlay = null, btnNativeRec = null, btnExtractor = null;
+			btnUpperPlay = null, btnNativeRec = null, btnExtractor = null,
+			btnCamCodec = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,9 @@ public class HomeFragment extends Fragment
 		
 		btnExtractor = (Button)view.findViewById(R.id.btnExtractor);
 		btnExtractor.setOnClickListener(this);
+		
+		btnCamCodec = (Button)view.findViewById(R.id.btnCamCodec);
+		btnCamCodec.setOnClickListener(this);
 		return view;
 	}
 
@@ -86,20 +93,25 @@ public class HomeFragment extends Fragment
 				startActivity(intent);
 				break;
 			case R.id.btnUpperRec:
-				intent.setClass(mContext, RecUpperActivity.class);
+				intent.setClass(mContext, UpperMediaRecorderActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.btnUpperPlay:
-				intent.setClass(mContext, MediaPlayerActivity.class);
+				intent.setClass(mContext, UpperMediaPlayerActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.btnNativeRec:
-				intent.setClass(mContext, RecNativeActivity.class);
+				intent.setClass(mContext, NativeMediaRecorderActivity.class);
 				startActivity(intent);
 				break;
 				
 			case R.id.btnExtractor:
-				intent.setClass(mContext, ExtractorActivity.class);
+				intent.setClass(mContext, NativeCameraActivity.class);//ExtractorActivity
+				startActivity(intent);
+				break;
+				
+			case R.id.btnCamCodec:
+				intent.setClass(mContext, CamCodecActivity.class);
 				startActivity(intent);
 				break;
 		}

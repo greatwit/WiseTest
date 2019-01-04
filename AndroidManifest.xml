@@ -26,13 +26,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".VideoViewActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".MediaPlayerActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".RecNativeActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".RecUpperActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".UpperMediaPlayerActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".NativeMediaRecorderActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".UpperMediaRecorderActivity" android:screenOrientation="portrait"/>
         <activity android:name=".PermissionActivity" android:screenOrientation="portrait"/>
         <activity android:name=".CameraRecvActivity" android:screenOrientation="portrait"/>
         <activity android:name=".CameraSendActivity" android:screenOrientation="portrait"/>
         <activity android:name=".ExtractorActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".CamCodecActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".CameraSrcActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".NativeCameraActivity" android:screenOrientation="portrait"/>
         <activity android:name=".recorder.CustomRecordActivity" />
         <activity android:name=".recorder.PlayVideoActivity" />
         <activity android:name=".recorder.RecorderMainActivity" />
